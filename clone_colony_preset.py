@@ -1,21 +1,25 @@
 from copy import deepcopy
+import os
 from pathlib import Path
 import re
 import xml.etree.ElementTree as ET
 
 
-SOURCE_PATH = Path(
-    r"C:\Users\lilly\AppData\LocalLow\Ludeon Studios\RimWorld by Ludeon Studios"
-    r"\PawnEditor\StartingPreset\Colony 1.xml"
+USER_DATA_ROOT = (
+    Path(os.environ.get("USERPROFILE", str(Path.home())))
+    / "AppData" / "LocalLow" / "Ludeon Studios"
+    / "RimWorld by Ludeon Studios"
 )
-OUTPUT_PATH = Path(
-    r"C:\Users\lilly\AppData\LocalLow\Ludeon Studios\RimWorld by Ludeon Studios"
-    r"\PawnEditor\StartingPreset\Colony 32.xml"
-)
+SOURCE_PATH = USER_DATA_ROOT / "PawnEditor" / "StartingPreset" / "Colony 1.xml"
+OUTPUT_PATH = USER_DATA_ROOT / "PawnEditor" / "StartingPreset" / "Colony 32.xml"
 TARGET_COUNT = 32
 
 
 def main():
+    if not SOURCE_PATH.is_file():
+        raise FileNotFoundError(
+            f"Source colony preset was not found: {SOURCE_PATH}"
+        )
     tree = ET.parse(SOURCE_PATH)
     root = tree.getroot()
     humans = root.find("humans")
@@ -256,6 +260,7 @@ def main():
     if len(pawn_load_ids) != len(set(pawn_load_ids)):
         raise ValueError("The output contains duplicate loadIDs across human entries.")
 
+    OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)
     ET.indent(tree, space="\t")
     tree.write(OUTPUT_PATH, encoding="utf-8", xml_declaration=True)
     print(
