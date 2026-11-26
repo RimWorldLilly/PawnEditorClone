@@ -1,21 +1,25 @@
 from copy import deepcopy
+import os
 from pathlib import Path
 import re
 import xml.etree.ElementTree as ET
 
 
-SOURCE_PATH = Path(
-    r"C:\Users\lilly\AppData\LocalLow\Ludeon Studios\RimWorld by Ludeon Studios"
-    r"\PawnEditor\ColonistList\Humans\Colonists 1.xml"
+USER_DATA_ROOT = (
+    Path(os.environ.get("USERPROFILE", str(Path.home())))
+    / "AppData" / "LocalLow" / "Ludeon Studios"
+    / "RimWorld by Ludeon Studios"
 )
-OUTPUT_PATH = Path(
-    r"C:\Users\lilly\AppData\LocalLow\Ludeon Studios\RimWorld by Ludeon Studios"
-    r"\PawnEditor\ColonistList\Humans\Colonists 32.xml"
-)
+SOURCE_PATH = USER_DATA_ROOT / "PawnEditor" / "ColonistList" / "Humans" / "Colonists 1.xml"
+OUTPUT_PATH = USER_DATA_ROOT / "PawnEditor" / "ColonistList" / "Humans" / "Colonists 32.xml"
 TARGET_COUNT = 32
 
 
 def main():
+    if not SOURCE_PATH.is_file():
+        raise FileNotFoundError(
+            f"Source colonist list was not found: {SOURCE_PATH}"
+        )
     tree = ET.parse(SOURCE_PATH)
     root = tree.getroot()
     if root.tag != "ColonistList.Humans":
